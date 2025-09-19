@@ -20,12 +20,15 @@ jobs:
           NODE_OPTIONS: --openssl-legacy-provider
       - run: make lint
       - run: make test
-      - if: startsWith(github.ref, 'refs/tags/v')
-        run: echo "$DOCKER_PASS" | docker login --username "$DOCKER_LOGIN" --password-stdin
+      - run: echo "$DOCKER_PASS" | docker login --username "$DOCKER_LOGIN" --password-stdin
         env:
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
           DOCKER_LOGIN: ${{ secrets.DOCKER_LOGIN }}
       - if: startsWith(github.ref, 'refs/tags/v')
         run: make release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ !startsWith(github.ref, 'refs/tags/v')}}
+        run: make release-snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
